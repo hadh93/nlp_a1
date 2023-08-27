@@ -14,10 +14,11 @@ class FeatureExtractor(object):
     """
     Feature extraction base type. Takes a sentence and returns an indexed list of features.
     """
+
     def get_indexer(self):
         raise Exception("Don't call me, call my subclasses")
 
-    def extract_features(self, sentence: List[str], add_to_indexer: bool=False) -> Counter:
+    def extract_features(self, sentence: List[str], add_to_indexer: bool = False) -> Counter:
         """
         Extract features from a sentence represented as a list of words. Includes a flag add_to_indexer to
         :param sentence: words in the example to featurize
@@ -30,11 +31,13 @@ class FeatureExtractor(object):
         raise Exception("Don't call me, call my subclasses")
 
 
+# FIXME: Part 1. PERCEPTRON
 class UnigramFeatureExtractor(FeatureExtractor):
     """
     Extracts unigram bag-of-words features from a sentence. It's up to you to decide how you want to handle counts
     and any additional preprocessing you want to do.
     """
+
     def __init__(self, indexer: Indexer):
         raise Exception("Must be implemented")
 
@@ -43,6 +46,7 @@ class BigramFeatureExtractor(FeatureExtractor):
     """
     Bigram feature extractor analogous to the unigram one.
     """
+
     def __init__(self, indexer: Indexer):
         raise Exception("Must be implemented")
 
@@ -51,6 +55,7 @@ class BetterFeatureExtractor(FeatureExtractor):
     """
     Better feature extractor...try whatever you can think of!
     """
+
     def __init__(self, indexer: Indexer):
         raise Exception("Must be implemented")
 
@@ -59,6 +64,7 @@ class SentimentClassifier(object):
     """
     Sentiment classifier base type
     """
+
     def predict(self, sentence: List[str]) -> int:
         """
         :param sentence: words (List[str]) in the sentence to classify
@@ -71,18 +77,24 @@ class TrivialSentimentClassifier(SentimentClassifier):
     """
     Sentiment classifier that always predicts the positive class.
     """
+
     def predict(self, sentence: List[str]) -> int:
         return 1
 
 
+# FIXME: Part 1. PERCEPTRON
 class PerceptronClassifier(SentimentClassifier):
     """
     Implement this class -- you should at least have init() and implement the predict method from the SentimentClassifier
     superclass. Hint: you'll probably need this class to wrap both the weight vector and featurizer -- feel free to
     modify the constructor to pass these in.
     """
+
     def __init__(self):
         raise Exception("Must be implemented")
+
+    def predict(self, sentence: List[str]) -> int:  #FIXME: WTF is this?
+        pass
 
 
 class LogisticRegressionClassifier(SentimentClassifier):
@@ -91,10 +103,12 @@ class LogisticRegressionClassifier(SentimentClassifier):
     superclass. Hint: you'll probably need this class to wrap both the weight vector and featurizer -- feel free to
     modify the constructor to pass these in.
     """
+
     def __init__(self):
         raise Exception("Must be implemented")
 
 
+# FIXME: Part 1. PERCEPTRON
 def train_perceptron(train_exs: List[SentimentExample], feat_extractor: FeatureExtractor) -> PerceptronClassifier:
     """
     Train a classifier with the perceptron.
@@ -105,7 +119,8 @@ def train_perceptron(train_exs: List[SentimentExample], feat_extractor: FeatureE
     raise Exception("Must be implemented")
 
 
-def train_logistic_regression(train_exs: List[SentimentExample], feat_extractor: FeatureExtractor) -> LogisticRegressionClassifier:
+def train_logistic_regression(train_exs: List[SentimentExample],
+                              feat_extractor: FeatureExtractor) -> LogisticRegressionClassifier:
     """
     Train a logistic regression model.
     :param train_exs: training set, List of SentimentExample objects
