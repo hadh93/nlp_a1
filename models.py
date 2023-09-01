@@ -3,8 +3,9 @@
 from collections import Counter
 
 import nltk
-import numpy
+import numpy as np
 import spacy
+import random
 
 from sentiment_data import *
 from utils import *
@@ -107,11 +108,21 @@ class PerceptronClassifier(SentimentClassifier):
     modify the constructor to pass these in.
     """
 
-    def __init__(self):
-        raise Exception("Must be implemented")
+    def __init__(self, weight_vector, featurizer):
+        self.weight_vector = weight_vector #FIXME: implement this
+        self.featurizer = featurizer #FIXME: implement this
 
-    def predict(self, sentence: List[str]) -> int:  #FIXME: WTF is this?
-        pass
+    def predict(self, sentence: List[str]) -> int:  #FIXME: implement this
+        features = self.featurizer.extract_features(sentence)
+        predicted_val = 0
+        for f in features:
+            predicted_val += features[f]*self.weight_vector[f]
+
+        if predicted_val > 0:
+            return 1
+        else:
+            return 0
+
 
 
 class LogisticRegressionClassifier(SentimentClassifier):
@@ -133,7 +144,32 @@ def train_perceptron(train_exs: List[SentimentExample], feat_extractor: FeatureE
     :param feat_extractor: feature extractor to use
     :return: trained PerceptronClassifier model
     """
-    raise Exception("Must be implemented")
+    random.seed(10)
+    alpha = 0.05 #FIXME: arbitrary choice
+    epochs = 50 #FIXME: arbitrary choice
+    weight_vector = [0 for i in range(len(feat_extractor.get_indexer()))]
+
+    perceptron_classifier = PerceptronClassifier(weight_vector, feat_extractor)
+    for e in range(epochs):
+        random.shuffle(train_exs)
+        for train_ex in train_exs:
+            if train_ex.label == perceptron_classifier.predict(train_ex.words):
+                continue
+            else:
+                features = feat_extractor.extract_features(train_ex.words, True) # cuz we are 'training'
+                for i in range(len(feat_extractor.get_indexer()) - len(perceptron_classifier.weight_vector)):
+                    perceptron_classifier.weight_vector.append(0)
+                perceptron_classifier.weight_vector.append(0)
+                if train_ex.label == 1:
+                    for word_idx in features:
+                        perceptron_classifier.weight_vector[word_idx] += alpha * features[word_idx]
+                elif train_ex.label == 0:
+                    for word_idx in features:
+                        perceptron_classifier.weight_vector[word_idx] -= alpha * features[word_idx]
+                else:
+                    print("This should not happen")
+    return perceptron_classifier
+
 
 
 def train_logistic_regression(train_exs: List[SentimentExample],
