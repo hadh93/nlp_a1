@@ -37,10 +37,26 @@ class UnigramFeatureExtractor(FeatureExtractor):
     Extracts unigram bag-of-words features from a sentence. It's up to you to decide how you want to handle counts
     and any additional preprocessing you want to do.
     """
-    #where is the sentence?
 
     def __init__(self, indexer: Indexer):
-        raise Exception("Must be implemented")
+        self.indexer = indexer
+
+    def get_indexer(self):
+        return self.indexer
+
+    def extract_features(self, sentence: List[str], add_to_indexer: bool = False) -> Counter:
+        features = Counter()
+        for word in sentence:
+            word = word.lower() # lowercase
+            if self.indexer.contains(word):
+                # 0 or 1 feature space
+                features[self.indexer.index_of(word)] = 1
+            else:
+                if add_to_indexer:
+                    features[self.indexer.add_and_get_index(word)] = 1
+        return features
+
+
 
 
 class BigramFeatureExtractor(FeatureExtractor):
