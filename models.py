@@ -1,5 +1,6 @@
 # models.py
-
+import math
+import time
 from collections import Counter
 
 import nltk
@@ -69,6 +70,8 @@ class BigramFeatureExtractor(FeatureExtractor):
         raise Exception("Must be implemented")
 
 
+
+
 class BetterFeatureExtractor(FeatureExtractor):
     """
     Better feature extractor...try whatever you can think of!
@@ -109,14 +112,16 @@ class PerceptronClassifier(SentimentClassifier):
     """
 
     def __init__(self, weight_vector, featurizer):
-        self.weight_vector = weight_vector #FIXME: implement this
-        self.featurizer = featurizer #FIXME: implement this
+        self.weight_vector = weight_vector
+        self.featurizer = featurizer
 
     def predict(self, sentence: List[str]) -> int:  #FIXME: implement this
         features = self.featurizer.extract_features(sentence)
         predicted_val = 0
+
         for f in features:
             predicted_val += features[f]*self.weight_vector[f]
+
 
         if predicted_val > 0:
             return 1
@@ -132,8 +137,37 @@ class LogisticRegressionClassifier(SentimentClassifier):
     modify the constructor to pass these in.
     """
 
-    def __init__(self):
-        raise Exception("Must be implemented")
+    def __init__(self, weight_vector, featurizer):
+        self.weight_vector = weight_vector
+        self.featurizer = featurizer
+
+    def predict(self, sentence: List[str]) -> int:
+        P_1_X = self.p_1_x(sentence)
+
+        if P_1_X > 0.5:
+            return 1
+        else:
+            return 0
+
+    def p_1_x(self, sentence):
+        features = self.featurizer.extract_features(sentence)
+        p_1_x = 0
+        for f in features:
+            p_1_x += features[f]*self.weight_vector[f] #w_t_fx
+        p_1_x = math.exp(p_1_x) / (1+math.exp(p_1_x))
+        return p_1_x
+
+    def p_1_neg_x(self, sentence):
+        features = self.featurizer.extract_features(sentence)
+        P_1_NEG_X = 0
+        for f in features:
+            P_1_NEG_X += features[f]*self.weight_vector[f] #w_t_fx
+
+        P_1_NEG_X = 1/(1+math.exp(P_1_NEG_X))
+        return P_1_NEG_X
+
+
+
 
 
 # FIXME: Part 1. PERCEPTRON
@@ -180,7 +214,32 @@ def train_logistic_regression(train_exs: List[SentimentExample],
     :param feat_extractor: feature extractor to use
     :return: trained LogisticRegressionClassifier model
     """
-    raise Exception("Must be implemented")
+    random.seed(10)
+    alpha = 0.1  # FIXME: arbitrary choice
+    epochs = 15  # FIXME: arbitrary choice
+    weight_vector = [0 for i in range(len(feat_extractor.get_indexer()))]
+
+    lr_classifier = LogisticRegressionClassifier(weight_vector, feat_extractor)
+    for e in range(epochs):
+        random.shuffle(train_exs)
+        for train_ex in train_exs:
+            features = feat_extractor.extract_features(train_ex.words, True)  # cuz we are 'training'
+            for i in range(len(feat_extractor.get_indexer()) - len(lr_classifier.weight_vector)):
+                lr_classifier.weight_vector.append(0)
+
+            lr_classifier.weight_vector.append(0)
+            if train_ex.label == 1:
+                if lr_classifier.predict(train_ex.words) == 1:
+                    continue
+                for f in features:
+                    weight_vector[f] += alpha*(1-lr_classifier.p_1_x(train_ex.words))
+            else:
+                if lr_classifier.predict(train_ex.words) == 0:
+                    continue
+                for f in features:
+                    weight_vector[f] -= alpha*(1-lr_classifier.p_1_neg_x(train_ex.words))
+    return lr_classifier
+
 
 
 def train_model(args, train_exs: List[SentimentExample], dev_exs: List[SentimentExample]) -> SentimentClassifier:
