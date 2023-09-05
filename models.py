@@ -101,15 +101,15 @@ class BetterFeatureExtractor(FeatureExtractor):
 
     def extract_features(self, sentence: List[str], add_to_indexer: bool = False) -> Counter:
         features = Counter()
-        for i in range(len(sentence) - 1):
-            bigram = sentence[i] + " " + sentence[i + 1]
-            bigram = bigram.lower()
-            if self.indexer.contains(bigram):
+        for i in range(len(sentence) - 2):
+            trigram = sentence[i] + " " + sentence[i + 1] + " " + sentence[i+2]
+            trigram = trigram.lower()
+            if self.indexer.contains(trigram):
                 # 0 or 1 feature space
-                features[self.indexer.index_of(bigram)] = 1
+                features[self.indexer.index_of(trigram)] = 1
             else:
                 if add_to_indexer:
-                    features[self.indexer.add_and_get_index(bigram)] = 1
+                    features[self.indexer.add_and_get_index(trigram)] = 1
         return features
 
 
