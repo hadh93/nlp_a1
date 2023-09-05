@@ -214,9 +214,9 @@ def train_logistic_regression(train_exs: List[SentimentExample],
     :param feat_extractor: feature extractor to use
     :return: trained LogisticRegressionClassifier model
     """
-    random.seed(20) #FIXME: return here
+    random.seed(7) #FIXME: return here
     alpha = 0.01
-    epochs = 6
+    epochs = 20
     weight_vector = [0 for i in range(len(feat_extractor.get_indexer()))]
 
     lr_classifier = LogisticRegressionClassifier(weight_vector, feat_extractor)
