@@ -67,7 +67,23 @@ class BigramFeatureExtractor(FeatureExtractor):
     """
 
     def __init__(self, indexer: Indexer):
-        raise Exception("Must be implemented")
+        self.indexer = indexer
+
+    def get_indexer(self):
+        return self.indexer
+
+    def extract_features(self, sentence: List[str], add_to_indexer: bool = False) -> Counter:
+        features = Counter()
+        for i in range(len(sentence)-1):
+            bigram = sentence[i] + " " + sentence[i+1]
+            bigram = bigram.lower()
+            if self.indexer.contains(bigram):
+                # 0 or 1 feature space
+                features[self.indexer.index_of(bigram)] = 1
+            else:
+                if add_to_indexer:
+                    features[self.indexer.add_and_get_index(bigram)] = 1
+        return features
 
 
 
@@ -78,7 +94,23 @@ class BetterFeatureExtractor(FeatureExtractor):
     """
 
     def __init__(self, indexer: Indexer):
-        raise Exception("Must be implemented")
+        self.indexer = indexer
+
+    def get_indexer(self):
+        return self.indexer
+
+    def extract_features(self, sentence: List[str], add_to_indexer: bool = False) -> Counter:
+        features = Counter()
+        for i in range(len(sentence) - 1):
+            bigram = sentence[i] + " " + sentence[i + 1]
+            bigram = bigram.lower()
+            if self.indexer.contains(bigram):
+                # 0 or 1 feature space
+                features[self.indexer.index_of(bigram)] = 1
+            else:
+                if add_to_indexer:
+                    features[self.indexer.add_and_get_index(bigram)] = 1
+        return features
 
 
 class SentimentClassifier(object):
@@ -214,7 +246,7 @@ def train_logistic_regression(train_exs: List[SentimentExample],
     :param feat_extractor: feature extractor to use
     :return: trained LogisticRegressionClassifier model
     """
-    random.seed(2) #FIXME: return here
+    random.seed(2324) #FIXME: return here
     alpha = 0.1
     epochs = 15
     weight_vector = [0 for i in range(len(feat_extractor.get_indexer()))]
